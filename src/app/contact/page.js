@@ -23,7 +23,7 @@ const ContactPage = () => {
     // For now, this just logs the data and shows an alert.
     // To make this email you, you would use a service like Formspree.
     console.log('Form submitted:', formData);
-    alert('Thank you for your message! We\'ll get back to you soon.');
+    alert('Thank you for your message! We&apos;ll get back to you soon.');
     // Reset form
     setFormData({
       fullName: '',
@@ -41,7 +41,7 @@ const ContactPage = () => {
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Have questions about our workshops or want to discuss a custom creative session? 
-          We'd love to hear from you!
+          We&apos;d love to hear from you!
         </p>
       </div>
 

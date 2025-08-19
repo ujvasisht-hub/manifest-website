@@ -13,7 +13,7 @@ const AboutPage = () => {
         {/* Text Content */}
         <div className="space-y-6">
           <p className="text-lg text-gray-700 leading-relaxed">
-            Manifest by TMN is more than just a creative studio – it's a sanctuary where artistic dreams come to life. Founded with the vision of creating an inclusive space for artists and creative enthusiasts, we believe in the transformative power of art and its ability to connect communities.
+            Manifest by TMN is more than just a creative studio – it&apos;s a sanctuary where artistic dreams come to life. Founded with the vision of creating an inclusive space for artists and creative enthusiasts, we believe in the transformative power of art and its ability to connect communities.
           </p>
           
           <p className="text-lg text-gray-700 leading-relaxed">
