@@ -3,31 +3,34 @@
 import React, { useState } from 'react';
 
 const AdminPage = () => {
-  // State for the main event details
+  // Add is_active to the initial state
   const [eventData, setEventData] = useState({
     title: '',
     artist_name: '',
-    razorpay_link: '', // Main Razorpay link for the event
+    razorpay_link: '',
+    is_active: true, // Active by default
   });
-  // State for the image file
   const [imageFile, setImageFile] = useState(null);
-  // State for the list of sessions (starts with one empty session)
+  // Add time to the initial session state
   const [sessions, setSessions] = useState([
-    { session_title: '', date: '', cost: '' }
+    { session_title: '', date: '', time: '', cost: '' }
   ]);
-  // State for loading and messages
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleEventChange = (e) => {
-    setEventData({ ...eventData, [e.target.name]: e.target.value });
+    // Handle checkbox separately
+    if (e.target.type === 'checkbox') {
+      setEventData({ ...eventData, [e.target.name]: e.target.checked });
+    } else {
+      setEventData({ ...eventData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleFileChange = (e) => {
     if (e.target.files) setImageFile(e.target.files[0]);
   };
 
-  // Function to handle changes in a specific session's input fields
   const handleSessionChange = (index, e) => {
     const updatedSessions = sessions.map((session, i) => 
       index === i ? { ...session, [e.target.name]: e.target.value } : session
@@ -35,16 +38,14 @@ const AdminPage = () => {
     setSessions(updatedSessions);
   };
 
-  // Function to add a new empty session
   const addSession = () => {
-    if (sessions.length < 10) { // Limit to 10 sessions
-      setSessions([...sessions, { session_title: '', date: '', cost: '' }]);
+    if (sessions.length < 10) {
+      setSessions([...sessions, { session_title: '', date: '', time: '', cost: '' }]);
     }
   };
 
-  // Function to remove a session by its index
   const removeSession = (index) => {
-    if (sessions.length > 1) { // Always keep at least one session
+    if (sessions.length > 1) {
       setSessions(sessions.filter((_, i) => i !== index));
     }
   };
@@ -62,8 +63,8 @@ const AdminPage = () => {
     formData.append('title', eventData.title);
     formData.append('artist_name', eventData.artist_name);
     formData.append('razorpay_link', eventData.razorpay_link);
+    formData.append('is_active', eventData.is_active);
     formData.append('image', imageFile);
-    // Convert sessions array to a JSON string to send with FormData
     formData.append('sessions', JSON.stringify(sessions));
     
     const response = await fetch('/api/create-workshop', {
@@ -75,10 +76,10 @@ const AdminPage = () => {
 
     if (response.ok) {
       setMessage('Workshop Event and all Sessions created successfully!');
-      // Reset form to initial state
-      setEventData({ title: '', artist_name: '', razorpay_link: '' });
+      // Reset form
+      setEventData({ title: '', artist_name: '', razorpay_link: '', is_active: true });
       setImageFile(null);
-      setSessions([{ session_title: '', date: '', cost: '' }]);
+      setSessions([{ session_title: '', date: '', time: '', cost: '' }]);
       document.getElementById('image').value = '';
     } else {
       setMessage(`Error: ${result.error}`);
@@ -93,9 +94,9 @@ const AdminPage = () => {
       </div>
       <div className="bg-white p-8 rounded-lg shadow-md">
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Main Event Details Section */}
           <div className="space-y-4 p-4 border rounded-md">
             <h2 className="text-lg font-semibold border-b pb-2">Main Event Details</h2>
+            {/* ... other fields ... */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">Workshop Title</label>
               <input type="text" name="title" id="title" required value={eventData.title} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" />
@@ -106,27 +107,39 @@ const AdminPage = () => {
             </div>
             <div>
               <label htmlFor="razorpay_link" className="block text-sm font-medium text-gray-700">Main Razorpay Link</label>
-              <input type="url" name="razorpay_link" id="razorpay_link" required value={eventData.razorpay_link} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="https://rzp.io/l/..." />
+              <input type="url" name="razorpay_link" id="razorpay_link" required value={eventData.razorpay_link} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="https://rzp.io/l/..."/>
             </div>
             <div>
               <label htmlFor="image" className="block text-sm font-medium text-gray-700">Workshop Poster</label>
               <input type="file" name="image" id="image" required onChange={handleFileChange} accept="image/png, image/jpeg" className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"/>
             </div>
+             {/* New "Active Status" Toggle */}
+            <div className="flex items-center">
+              <input type="checkbox" name="is_active" id="is_active" checked={eventData.is_active} onChange={handleEventChange} className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"/>
+              <label htmlFor="is_active" className="ml-2 block text-sm font-medium text-gray-900">Set workshop as active</label>
+            </div>
           </div>
           
-          {/* Dynamic Sessions Section */}
           <div className="space-y-4 p-4 border rounded-md">
             <h2 className="text-lg font-semibold border-b pb-2">Workshop Sessions</h2>
             {sessions.map((session, index) => (
               <div key={index} className="p-3 border rounded-md space-y-3 relative">
                 <h3 className="font-medium text-gray-600">Session {index + 1}</h3>
+                {/* ... other session fields ... */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">Session Title</label>
                   <input type="text" name="session_title" required value={session.session_title} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., 11am - 12pm Slot"/>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Date</label>
-                  <input type="text" name="date" required value={session.date} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., Saturday, 25 Oct 2025"/>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Date</label>
+                    <input type="text" name="date" required value={session.date} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., Saturday, 25 Oct 2025"/>
+                  </div>
+                   {/* New "Time" Field */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Time</label>
+                    <input type="text" name="time" required value={session.time} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., 11:00 AM - 12:00 PM"/>
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Cost</label>
