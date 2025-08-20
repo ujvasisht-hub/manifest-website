@@ -1,0 +1,15 @@
+{
+  "protectionBypass": {
+    "deployment": "shareable"
+  },
+  "routes": [
+    {
+      "src": "/admin",
+      "dest": "/admin",
+      "methods": ["GET", "POST"],
+      "headers": {
+        "Authorization": "Basic TWFuaWZlc3RhZG1pbjpNYW5pZmVzdDEyMw"
+      }
+    }
+  ]
+}
