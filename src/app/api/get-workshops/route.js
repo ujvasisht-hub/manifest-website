@@ -19,7 +19,7 @@ export async function GET() {
         title,
         artist_name,
         is_active,
-        workshop_sessions ( count )
+        workshop_sessions ( date, time )
       `)
       .order('created_at', { ascending: false }); // Show newest first
 
