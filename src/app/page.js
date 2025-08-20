@@ -15,7 +15,8 @@ const Home = () => {
       // We use the supabase client to select all rows from our 'workshops' table
       const { data, error } = await supabase
         .from('workshop_events')
-        .select('*'); // '*' means select all columns
+        .select('*') // '*' means select all columns
+        .eq('is_active', true); // 👈 Add this line to filter for active workshops
 
       if (error) {
         console.error('Error fetching workshops:', error);
