@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-// Helper to create a Supabase admin client
 const getSupabaseAdmin = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -11,24 +10,30 @@ export async function GET() {
   const supabase = getSupabaseAdmin();
 
   try {
-    // Fetch all events and a count of their related sessions
+    // Fetch all sessions and include their parent event's details
     const { data, error } = await supabase
-      .from('workshop_events')
+      .from('workshop_sessions')
       .select(`
         id,
-        title,
-        artist_name,
-        is_active,
-        workshop_sessions ( date, time )
+        session_title,
+        date,
+        time,
+        cost,
+        workshop_events (
+          id,
+          title,
+          artist_name,
+          is_active
+        )
       `)
-      .order('created_at', { ascending: false }); // Show newest first
+      .order('date', { ascending: false }); // Show newest sessions first
 
     if (error) throw error;
 
     return NextResponse.json({ data });
 
   } catch (error) {
-    console.error('Error fetching workshops:', error);
+    console.error('Error fetching workshop sessions:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
