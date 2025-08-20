@@ -1,33 +1,29 @@
-'use client' // This is important for fetching data in the browser
+'use client' 
 
 import React, { useState, useEffect } from 'react';
 import WorkshopCard from '../components/WorkshopCard';
-import { supabase } from '../utils/supabaseClient'; // We import our supabase connection
+import { supabase } from '../utils/supabaseClient';
 
 const Home = () => {
-  // We use "state" to hold the workshops data. It starts as an empty list.
   const [workshops, setWorkshops] = useState([]);
 
-  // This "useEffect" hook runs once when the page loads
   useEffect(() => {
-    // This is an async function to get the data from Supabase
     const getWorkshops = async () => {
-      // We use the supabase client to select all rows from our 'workshops' table
+      // This query now fetches events AND their related sessions
       const { data, error } = await supabase
         .from('workshop_events')
-        .select('*') // '*' means select all columns
-        .eq('is_active', true); // 👈 Add this line to filter for active workshops
+        .select('*, workshop_sessions(*)') // 👈 This is the updated line
+        .eq('is_active', true);
 
       if (error) {
         console.error('Error fetching workshops:', error);
       } else {
-        // If data is fetched successfully, we update our workshops list
         setWorkshops(data);
       }
     };
 
-    getWorkshops(); // We call the function to start fetching
-  }, []); // The empty array [] means this runs only once on load
+    getWorkshops();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -40,7 +36,6 @@ const Home = () => {
         </p>
       </div>
 
-      {/* Workshop Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {workshops.map((workshop) => (
           <WorkshopCard key={workshop.id} workshop={workshop} />
