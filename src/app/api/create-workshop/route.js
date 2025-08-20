@@ -13,7 +13,7 @@ export async function POST(request) {
 
   // Insert the data into the 'workshops' table
   const { data, error } = await supabase
-    .from('workshops')
+    .from('workshop_events')
     .insert([
       { 
         title: workshopData.title,

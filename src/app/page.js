@@ -14,7 +14,7 @@ const Home = () => {
     const getWorkshops = async () => {
       // We use the supabase client to select all rows from our 'workshops' table
       const { data, error } = await supabase
-        .from('workshops')
+        .from('workshop_events')
         .select('*'); // '*' means select all columns
 
       if (error) {
