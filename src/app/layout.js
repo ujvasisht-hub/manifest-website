@@ -1,16 +1,15 @@
-'use client'; // Required for the "Back to Top" button's onClick event
+'use client'; 
 
 import Link from 'next/link';
 import Image from 'next/image';
 import { Montserrat } from 'next/font/google';
-import { FaInstagram, FaWhatsapp } from 'react-icons/fa'; // Import Instagram and WhatsApp icons
+// Import the new icons
+import { FaInstagram, FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaYoutube } from 'react-icons/fa';
 import './globals.css';
 
 const montserrat = Montserrat({ subsets: ['latin'] });
 
-// We are defining metadata in each page.js now, so we can remove the global one here.
-
-// New "Back to Top" component
+// "Back to Top" component
 const BackToTopButton = () => {
   const scrollToTop = () => {
     window.scrollTo({
@@ -25,7 +24,7 @@ const BackToTopButton = () => {
       className="fixed bottom-5 right-5 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-3 rounded-full shadow-lg transition-transform hover:scale-110"
       aria-label="Go to top"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 '0' 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
       </svg>
     </button>
@@ -54,24 +53,28 @@ export default function RootLayout({ children }) {
         
         <main className="flex-grow">{children}</main>
         
-        {/* START: New Footer Code */}
+        {/* START: Updated Footer Code */}
         <footer className="bg-black text-gray-300 mt-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Column 1: Logo and Contact */}
               <div className="space-y-4">
                 <Image src="/logo.png" alt="Manifest by TMN Logo" width={150} height={50} />
-                <a href="https://maps.app.goo.gl/whBvZErKRFXYywyC7" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white">
-                  5th floor, SMR Annexe, Hosa Road,<br/>
-                  1st Cross Rd, Kasavanahalli,<br/> 
-                  Bengaluru, Karnataka 560035
+                <a href="https://maps.app.goo.gl/whBvZErKRFXYywyC7" target="_blank" rel="noopener noreferrer" className="flex items-start space-x-2 text-gray-400 hover:text-white">
+                  <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
+                  <span>
+                    5th floor, SMR Annexe, Hosa Road,<br/>
+                    1st Cross Rd, Kasavanahalli,<br/> 
+                    Bengaluru, Karnataka 560035
+                  </span>
                 </a>
                 <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-gray-400 hover:text-white">
                   <FaWhatsapp />
                   <span>WhatsApp Us</span>
                 </a>
-                <a href="mailto:hello@manifestbytmn.com" className="block text-gray-400 hover:text-white">
-                  manifestbytmn@gmail.com
+                <a href="mailto:manifestbytmn@gmail.com" className="flex items-center space-x-2 text-gray-400 hover:text-white">
+                  <FaEnvelope />
+                  <span>manifestbytmn@gmail.com</span>
                 </a>
               </div>
 
@@ -95,6 +98,11 @@ export default function RootLayout({ children }) {
                     <FaInstagram />
                     <span>Aanchal Chandna</span>
                   </a>
+                  {/* Add New YouTube Link */}
+                   <a href="https://youtube.com/twinmenot" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
+                    <FaYoutube />
+                    <span>twinmenot Youtube</span>
+                   </a>
                 </div>
               </div>
 
@@ -111,7 +119,7 @@ export default function RootLayout({ children }) {
 
             {/* Bottom Bar */}
             <div className="mt-12 border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-              <p>&copy; {new Date().getFullYear()} Manifest by TMN. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} Manifest by TMN. All rights reserved.</p>
               <p className="mt-1">Made with ❤️ in India.</p>
             </div>
           </div>
