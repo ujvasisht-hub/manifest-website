@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link'; // This line is the "import" we needed to add
 
+// This is a new component we define inside the same file for the dashboard stats
 const StatCard = ({ title, value }) => (
   <div className="bg-gray-50 p-4 rounded-lg shadow-sm text-center">
     <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -90,7 +92,7 @@ const AdminPage = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artist Name</th> {/* 👈 Added */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artist Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Session Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
@@ -102,7 +104,7 @@ const AdminPage = () => {
               {filteredSessions.map((session) => (
                 <tr key={session.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{session.workshop_events.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.workshop_events.artist_name}</td> {/* 👈 Added */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.workshop_events.artist_name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{session.session_title}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.date}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.time}</td>
@@ -112,7 +114,10 @@ const AdminPage = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-teal-600 hover:text-teal-900">Edit</button>
+                    {/* This is the button we changed */}
+                    <Link href={`/admin/edit/${session.workshop_events.id}`} className="text-teal-600 hover:text-teal-900">
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -123,6 +128,7 @@ const AdminPage = () => {
       
       {/* Create Form Section */}
       <div className="mt-12">
+        {/* ... (Your entire form JSX goes here, unchanged) ... */}
         <div className="text-center mb-8"><h2 className="text-2xl font-bold text-gray-900">Create New Workshop Event</h2></div><div className="bg-white p-8 rounded-lg shadow-md"><form onSubmit={handleSubmit} className="space-y-8"><div className="space-y-4 p-4 border rounded-md"><h2 className="text-lg font-semibold border-b pb-2">Main Event Details</h2><div><label htmlFor="title" className="block text-sm font-medium text-gray-700">Workshop Title</label><input type="text" name="title" id="title" required value={eventData.title} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" /></div><div><label htmlFor="artist_name" className="block text-sm font-medium text-gray-700">Artist Name</label><input type="text" name="artist_name" id="artist_name" required value={eventData.artist_name} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" /></div><div><label htmlFor="razorpay_link" className="block text-sm font-medium text-gray-700">Main Razorpay Link</label><input type="url" name="razorpay_link" id="razorpay_link" required value={eventData.razorpay_link} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="https://rzp.io/l/..."/></div><div><label htmlFor="image" className="block text-sm font-medium text-gray-700">Workshop Poster</label><input type="file" name="image" id="image" required onChange={handleFileChange} accept="image/png, image/jpeg" className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"/></div><div className="flex items-center"><input type="checkbox" name="is_active" id="is_active" checked={eventData.is_active} onChange={handleEventChange} className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"/><label htmlFor="is_active" className="ml-2 block text-sm font-medium text-gray-900">Set workshop as active</label></div></div><div className="space-y-4 p-4 border rounded-md"><h2 className="text-lg font-semibold border-b pb-2">Workshop Sessions</h2>{sessions.map((session, index) => (<div key={index} className="p-3 border rounded-md space-y-3 relative"><h3 className="font-medium text-gray-600">Session {index + 1}</h3><div><label className="text-sm font-medium text-gray-700">Session Title</label><input type="text" name="session_title" required value={session.session_title} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., 11am - 12pm Slot"/></div><div className="grid grid-cols-2 gap-4"><div><label className="text-sm font-medium text-gray-700">Date</label><input type="text" name="date" required value={session.date} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., Saturday, 25 Oct 2025"/></div><div><label className="text-sm font-medium text-gray-700">Time</label><input type="text" name="time" required value={session.time} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., 11:00 AM - 12:00 PM"/></div></div><div><label className="text-sm font-medium text-gray-700">Cost</label><input type="text" name="cost" required value={session.cost} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md" placeholder="e.g., ₹1500"/></div>{sessions.length > 1 && (<button type="button" onClick={() => removeSession(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>)}</div>))}{sessions.length < 10 && (<button type="button" onClick={addSession} className="w-full text-teal-600 font-semibold py-2 px-4 rounded-md border-2 border-dashed border-teal-500 hover:bg-teal-50">+ Add Another Session</button>)}</div><div><button type="submit" disabled={loading} className="w-full bg-teal-600 text-white font-medium py-3 px-4 rounded-md hover:bg-teal-700 disabled:bg-gray-400">{loading ? 'Saving...' : 'Save Full Workshop'}</button></div></form>{message && <p className={`mt-4 text-center ${message.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>}</div>
       </div>
     </div>
