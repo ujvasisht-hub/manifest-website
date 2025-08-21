@@ -28,7 +28,7 @@ const PrivacyPolicyPage = () => {
           <li>To process your workshop bookings and manage your registration.</li>
           <li>To communicate with you about your booking, including confirmations, reminders, and important updates about the workshop.</li>
           <li>To respond to your questions, comments, and inquiries submitted through our contact form or other channels.</li>
-          <li>To send you information about future workshops and events, if you have opted-in to receive such communications.</li>
+          <li>To send you information about future workshops and events.</li>
         </ul>
 
         <h2>3. Data Security</h2>
@@ -42,7 +42,7 @@ const PrivacyPolicyPage = () => {
         
         <h2 className="mt-8">Contact Us</h2>
         <p>
-          If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:hello@manifestbytmn.com">hello@manifestbytmn.com</a>.
+          If you have any questions about this Privacy Policy, please contact us at manifestbytmn@gmail.com.
         </p>
       </div>
     </div>
