@@ -6,13 +6,13 @@ import { supabase } from '../utils/supabaseClient';
 
 const Home = () => {
   const [workshops, setWorkshops] = useState([]);
+  const [loading, setLoading] = useState(true); // 1. Add loading state
 
   useEffect(() => {
     const getWorkshops = async () => {
-      // This query now fetches events AND their related sessions
       const { data, error } = await supabase
         .from('workshop_events')
-        .select('*, workshop_sessions(*)') // 👈 This is the updated line
+        .select('*, workshop_sessions(*)')
         .eq('is_active', true);
 
       if (error) {
@@ -20,6 +20,7 @@ const Home = () => {
       } else {
         setWorkshops(data);
       }
+      setLoading(false); // 2. Set loading to false after fetch is complete
     };
 
     getWorkshops();
@@ -36,11 +37,18 @@ const Home = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {workshops.map((workshop) => (
-          <WorkshopCard key={workshop.id} workshop={workshop} />
-        ))}
-      </div>
+      {/* 3. Add conditional loading display */}
+      {loading ? (
+        <div className="text-center py-10">
+          <p className="text-lg text-gray-500">Loading workshops...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {workshops.map((workshop) => (
+            <WorkshopCard key={workshop.id} workshop={workshop} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
