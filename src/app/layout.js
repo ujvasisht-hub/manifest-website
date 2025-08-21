@@ -99,7 +99,7 @@ export default function RootLayout({ children }) {
                     <span>Aanchal Chandna</span>
                   </a>
                   {/* Add New YouTube Link */}
-                   <a href="https://youtube.com/twinmenot" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
+                   <a href="https://youtube.com/@twinmenot" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
                     <FaYoutube />
                     <span>twinmenot Youtube</span>
                    </a>
