@@ -62,16 +62,16 @@ export default function RootLayout({ children }) {
               <div className="space-y-4">
                 <Image src="/logo.png" alt="Manifest by TMN Logo" width={150} height={50} />
                 <a href="https://maps.app.goo.gl/whBvZErKRFXYywyC7" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white">
-                  123 Creative Street<br/>
-                  Arts District, Mumbai<br/>
-                  Maharashtra 400001
+                  5th floor, SMR Annexe, Hosa Road,<br/>
+                  1st Cross Rd, Kasavanahalli,<br/> 
+                  Bengaluru, Karnataka 560035
                 </a>
                 <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-gray-400 hover:text-white">
                   <FaWhatsapp />
-                  <span>+91 98765 43210</span>
+                  <span>WhatsApp Us</span>
                 </a>
                 <a href="mailto:hello@manifestbytmn.com" className="block text-gray-400 hover:text-white">
-                  hello@manifestbytmn.com
+                  manifestbytmn@gmail.com
                 </a>
               </div>
 
@@ -85,7 +85,7 @@ export default function RootLayout({ children }) {
                   </a>
                    <a href="https://instagram.com/twinmenot" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
                     <FaInstagram />
-                    <span>Twin Me Not</span>
+                    <span>twinmenot</span>
                   </a>
                    <a href="https://instagram.com/antrachandna" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
                     <FaInstagram />
@@ -93,7 +93,7 @@ export default function RootLayout({ children }) {
                   </a>
                    <a href="https://instagram.com/aanchal.chandna" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
                     <FaInstagram />
-                    <span>Aachal Chandna</span>
+                    <span>Aanchal Chandna</span>
                   </a>
                 </div>
               </div>
