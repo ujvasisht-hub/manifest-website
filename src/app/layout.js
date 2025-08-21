@@ -1,4 +1,4 @@
-import Link from 'next/link'; // Import the Link component
+import Link from 'next/link';
 import './globals.css';
 
 export const metadata = {
@@ -9,12 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        {/* START: New Header Code */}
+      <body className="flex flex-col min-h-screen">
         <header className="bg-white shadow-md">
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <div>
-              {/* You can replace this text with your logo */}
               <Link href="/" className="text-xl font-bold text-gray-900">
                 Manifest by TMN
               </Link>
@@ -32,11 +30,29 @@ export default function RootLayout({ children }) {
             </div>
           </nav>
         </header>
-        {/* END: New Header Code */}
-
-        <main>{children}</main>
-
-        {/* You can add a shared footer here later if you want */}
+        
+        <main className="flex-grow">{children}</main>
+        
+        {/* START: New Footer Code */}
+        <footer className="bg-gray-800 text-gray-300 mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex justify-center space-x-6">
+              <Link href="/terms-and-conditions" className="hover:text-white transition-colors">
+                Terms & Conditions
+              </Link>
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/cancellation-and-refunds" className="hover:text-white transition-colors">
+                Cancellation & Refunds
+              </Link>
+            </div>
+            <div className="mt-6 text-center text-sm text-gray-500">
+              &copy; {new Date().getFullYear()} Manifest by TMN. All rights reserved.
+            </div>
+          </div>
+        </footer>
+        {/* END: New Footer Code */}
       </body>
     </html>
   );
