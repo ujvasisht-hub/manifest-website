@@ -6,7 +6,7 @@ import { supabase } from '../utils/supabaseClient';
 
 const Home = () => {
   const [workshops, setWorkshops] = useState([]);
-  const [loading, setLoading] = useState(true); // 1. Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getWorkshops = async () => {
@@ -20,7 +20,7 @@ const Home = () => {
       } else {
         setWorkshops(data);
       }
-      setLoading(false); // 2. Set loading to false after fetch is complete
+      setLoading(false);
     };
 
     getWorkshops();
@@ -29,18 +29,18 @@ const Home = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        {/* Updated text colors below */}
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
           Upcoming Workshops
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-white max-w-2xl mx-auto">
           Join our creative community and explore your artistic potential through hands-on workshops led by experienced artists.
         </p>
       </div>
 
-      {/* 3. Add conditional loading display */}
       {loading ? (
         <div className="text-center py-10">
-          <p className="text-lg text-gray-500">Loading workshops...</p>
+          <p className="text-lg text-gray-400">Loading workshops...</p> {/* Changed to gray for visibility */}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
