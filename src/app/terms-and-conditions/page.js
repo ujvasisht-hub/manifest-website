@@ -55,7 +55,7 @@ const TermsAndConditionsPage = () => {
         
         <h2 className="mt-8">Contact Us</h2>
         <p>
-          If you have any questions about these Terms and Conditions, please contact us at [Your Email Address].
+          If you have any questions about these Terms and Conditions, please contact us at manifestbytmn@gmail.com.
         </p>
       </div>
     </div>
