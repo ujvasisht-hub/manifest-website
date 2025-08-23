@@ -31,7 +31,7 @@ export async function POST(request) {
     // 2. Send the email notification using Resend
     await resend.emails.send({
       from: 'inquiry@manifest.twinmenot.com', // Must be an email from your verified domain
-      to: 'twinmenot28@gmail.com', // 👈 **REPLACE WITH YOUR EMAIL**
+      to: 'ujvasisht@gmail.com', // 👈 **REPLACE WITH YOUR EMAIL**
       subject: `New Inquiry from ${formData.fullName}`,
       html: `
         <p>You have a new contact form submission:</p>
