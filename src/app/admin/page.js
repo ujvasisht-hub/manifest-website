@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from '../../utils/supabaseClient';
 
 const StatCard = ({ title, value }) => (
   <div className="bg-gray-700 p-4 rounded-lg shadow-sm text-center">
