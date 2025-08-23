@@ -40,12 +40,12 @@ const AboutPage = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <img
-              src="/images/studio_space_1.jpg" // Replace with your image file name
+              src="/images/studio_space_1.JPG" // Replace with your image file name
               alt="Studio space"
               className="w-full h-48 object-cover rounded-lg shadow-md"
             />
             <img
-              src="/images/studio_space_2.jpg" // Replace with your image file name
+              src="/images/studio_space_2.JPG" // Replace with your image file name
               alt="Art supplies"
               className="w-full h-48 object-cover rounded-lg shadow-md"
             />
@@ -56,7 +56,7 @@ const AboutPage = () => {
             className="w-full h-64 object-cover rounded-lg shadow-md"
           />
           <img
-            src="/images/studio_space_3.jpg" // Replace with your image file name
+            src="/images/studio_space_3.JPG" // Replace with your image file name
             alt="Creative workspace"
             className="w-full h-48 object-cover rounded-lg shadow-md"
           />
