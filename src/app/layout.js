@@ -3,13 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Montserrat } from 'next/font/google';
-// Import the new icons
 import { FaInstagram, FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaYoutube } from 'react-icons/fa';
 import './globals.css';
 
 const montserrat = Montserrat({ subsets: ['latin'] });
 
-// "Back to Top" component
 const BackToTopButton = () => {
   const scrollToTop = () => {
     window.scrollTo({
@@ -24,7 +22,7 @@ const BackToTopButton = () => {
       className="fixed bottom-5 right-5 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-3 rounded-full shadow-lg transition-transform hover:scale-110"
       aria-label="Go to top"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 '0' 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
       </svg>
     </button>
@@ -53,7 +51,6 @@ export default function RootLayout({ children }) {
         
         <main className="flex-grow">{children}</main>
         
-        {/* START: Updated Footer Code */}
         <footer className="bg-black text-gray-300 mt-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -98,7 +95,6 @@ export default function RootLayout({ children }) {
                     <FaInstagram />
                     <span>Aanchal Chandna</span>
                   </a>
-                  {/* Add New YouTube Link */}
                    <a href="https://youtube.com/@twinmenot" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-teal-400">
                     <FaYoutube />
                     <span>twinmenot Youtube</span>
@@ -119,14 +115,12 @@ export default function RootLayout({ children }) {
 
             {/* Bottom Bar */}
             <div className="mt-12 border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-              <p>© {new Date().getFullYear()} Manifest by TMN. All rights reserved.</p>
+              {/* This is the updated line */}
+              <p>© {new Date().getFullYear()} Manifest by TMN. All rights reserved by TWIN ME NOT LLP.</p>
               <p className="mt-1">Made with ❤️ in India.</p>
             </div>
           </div>
         </footer>
-        {/* END: New Footer Code */}
-
-        <BackToTopButton />
       </body>
     </html>
   );
