@@ -8,65 +8,50 @@ const getSupabaseAdmin = () => createClient(
 
 export async function POST(request) {
   const supabase = getSupabaseAdmin();
-  
   try {
     const formData = await request.formData();
     const title = formData.get('title');
     const artist_name = formData.get('artist_name');
-    const razorpay_link = formData.get('razorpay_link');
-    const is_active = formData.get('is_active') === 'true'; // Convert string to boolean
+    const is_active = formData.get('is_active') === 'true';
     const imageFile = formData.get('image');
     const sessions = JSON.parse(formData.get('sessions'));
 
-    // ... validation ...
-    if (!title || !artist_name || !imageFile || !sessions || sessions.length === 0) {
-      return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
-    }
-    
-    // 1. Upload the image to Supabase Storage
+    // 1. Upload Image (same as before)
     const fileName = `${Date.now()}-${imageFile.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('workshop-posters')
-      .upload(fileName, imageFile);
+    const { error: uploadError } = await supabase.storage.from('workshop-posters').upload(fileName, imageFile);
     if (uploadError) throw uploadError;
 
-    // 2. Get the public URL of the uploaded image
-    const { data: urlData } = supabase.storage
-      .from('workshop-posters')
-      .getPublicUrl(fileName);
+    // 2. Get public URL (same as before)
+    const { data: urlData } = supabase.storage.from('workshop-posters').getPublicUrl(fileName);
     const imageUrl = urlData.publicUrl;
 
-    // 3. Insert the main event data, including the new 'is_active' field
+    // 3. Insert main event (without razorpay_link)
     const { data: eventData, error: insertError } = await supabase
       .from('workshop_events')
-      .insert([
-        { 
-          title: title,
-          artist_name: artist_name,
-          razorpay_link: razorpay_link,
-          image_url: imageUrl,
-          is_active: is_active, // Add the new field here
-        }
-      ])
+      .insert([{ title, artist_name, is_active, image_url: imageUrl }])
       .select('id')
       .single();
     if (insertError) throw insertError;
 
     const newEventId = eventData.id;
 
-    // 4. Prepare and insert all the session data, now including the 'time' field
+    // 4. Prepare and insert sessions with new inventory and pricing data
     const sessionsToInsert = sessions.map(session => ({
-      ...session, // This will include session_title, date, time, and cost
+      session_title: session.session_title,
+      date: session.date,
+      time: session.time,
+      total_seats: parseInt(session.total_seats, 10),
+      seats_sold: 0,
+      use_tiered_pricing: session.use_tiered_pricing,
+      cost: session.use_tiered_pricing ? null : session.cost, // Only save cost if not tiered
+      pricing_tiers: session.use_tiered_pricing ? session.pricing_tiers : null, // Only save tiers if tiered
       event_id: newEventId,
     }));
-    
-    const { error: sessionsError } = await supabase
-      .from('workshop_sessions')
-      .insert(sessionsToInsert);
+
+    const { error: sessionsError } = await supabase.from('workshop_sessions').insert(sessionsToInsert);
     if (sessionsError) throw sessionsError;
 
-    return NextResponse.json({ message: 'Workshop Event and all Sessions created successfully' });
-
+    return NextResponse.json({ message: 'Workshop created successfully' });
   } catch (error) {
     console.error('Error creating workshop event:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
