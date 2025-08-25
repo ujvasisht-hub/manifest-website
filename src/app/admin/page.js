@@ -1,6 +1,6 @@
 'use client';
 
-import React, 'useState', useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../utils/supabaseClient';
@@ -52,16 +52,6 @@ const AdminPage = () => {
   
   if (authLoading) { return <div className="text-center p-12 text-white">Verifying access...</div>; }
   
-  // Group sessions by their parent event for the new display
-  const groupedByEvent = filteredSessions.reduce((acc, session) => {
-    const event = session.workshop_events;
-    if (!acc[event.id]) {
-      acc[event.id] = { ...event, sessions: [] };
-    }
-    acc[event.id].sessions.push(session);
-    return acc;
-  }, {});
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex justify-between items-center mb-8"><h1 className="text-3xl font-bold text-white">Admin Dashboard</h1><button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button></div>
@@ -125,7 +115,6 @@ const AdminPage = () => {
       
       {/* Create Form Section (restored and unchanged) */}
       <div className="mt-12">
-         {/* ... (Your full create form JSX goes here) ... */}
          <div className="text-center mb-8"><h2 className="text-2xl font-bold text-white">Create New Workshop Event</h2></div><div className="bg-white p-8 rounded-lg shadow-md"><form onSubmit={handleSubmit} className="space-y-8"><div className="space-y-4 p-4 border border-gray-300 rounded-md"><h2 className="text-lg font-semibold border-b border-gray-300 pb-2 text-black">Main Event Details</h2><div><label htmlFor="title" className="block text-sm font-medium text-gray-700">Workshop Title</label><input type="text" name="title" id="title" required value={eventData.title} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" /></div><div><label htmlFor="artist_name" className="block text-sm font-medium text-gray-700">Artist Name</label><input type="text" name="artist_name" id="artist_name" required value={eventData.artist_name} onChange={handleEventChange} className="mt-1 w-full px-4 py-2 border rounded-md" /></div><div><label htmlFor="image" className="block text-sm font-medium text-gray-700">Workshop Poster</label><input type="file" name="image" id="image" required onChange={handleFileChange} accept="image/png, image/jpeg" className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"/></div><div className="flex items-center"><input type="checkbox" name="is_active" id="is_active" checked={eventData.is_active} onChange={handleEventChange} className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"/><label htmlFor="is_active" className="ml-2 block text-sm font-medium text-gray-900">Set workshop as active</label></div></div><div className="space-y-4 p-4 border border-gray-300 rounded-md"><h2 className="text-lg font-semibold border-b border-gray-300 pb-2 text-black">Workshop Sessions</h2>{sessions.map((session, index) => (<div key={index} className="p-4 border border-gray-200 rounded-lg space-y-4 relative"><div className="flex justify-between items-center"><h3 className="font-medium text-gray-800">Session {index + 1}</h3><div className="flex items-center"><input type="checkbox" name="is_active" id={`session_is_active_${index}`} checked={session.is_active} onChange={(e) => handleSessionChange(index, e)} className="h-4 w-4 text-teal-600 border-gray-300 rounded"/><label htmlFor={`session_is_active_${index}`} className="ml-2 block text-sm font-medium text-gray-900">Active</label></div></div><div><label className="text-sm font-medium text-gray-700">Session Title</label><input type="text" name="session_title" required value={session.session_title} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md text-black" placeholder="e.g., 11am - 12pm Slot"/></div><div className="grid grid-cols-2 gap-4"><div><label className="text-sm font-medium text-gray-700">Date</label><input type="text" name="date" required value={session.date} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md text-black"/></div><div><label className="text-sm font-medium text-gray-700">Time</label><input type="text" name="time" required value={session.time} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md text-black"/></div></div><div><label className="text-sm font-medium text-gray-700">Total Seats</label><input type="number" name="total_seats" required value={session.total_seats} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md text-black" /></div><div className="flex items-center"><input type="checkbox" name="use_tiered_pricing" id={`use_tiered_pricing_${index}`} checked={session.use_tiered_pricing} onChange={(e) => handleSessionChange(index, e)} className="h-4 w-4 text-teal-600 border-gray-300 rounded"/><label htmlFor={`use_tiered_pricing_${index}`} className="ml-2 block text-sm font-medium text-gray-900">Use Tiered Pricing</label></div>{session.use_tiered_pricing ? (<div><label className="text-sm font-medium text-gray-700">Pricing Tiers</label><div className="space-y-2 mt-2">{session.pricing_tiers.map((tier, tierIndex) => (<PricingTierInput key={tierIndex} tier={tier} index={tierIndex} onChange={(tierIdx, event) => handleTierChange(index, tierIdx, event)} onRemove={() => removeTier(index, tierIndex)} />))}</div><button type="button" onClick={() => addTier(index)} className="mt-2 text-sm text-teal-600 font-semibold">+ Add Tier</button></div>) : (<div><label className="text-sm font-medium text-gray-700">Flat Cost</label><input type="text" name="cost" required value={session.cost} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md text-black" placeholder="e.g., ₹1500"/></div>)}{sessions.length > 1 && (<button type="button" onClick={() => removeSession(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>)}</div>))}
               {sessions.length < 10 && (<button type="button" onClick={addSession} className="w-full text-teal-600 font-semibold py-2 px-4 rounded-md border-2 border-dashed border-teal-500 hover:bg-teal-50">+ Add Another Session</button>)}
             </div>
