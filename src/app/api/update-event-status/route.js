@@ -10,22 +10,23 @@ export async function POST(request) {
   const supabase = getSupabaseAdmin();
   const { eventId, newStatus } = await request.json();
 
-  if (eventId === undefined || newStatus === undefined) {
-    return NextResponse.json({ error: 'Missing eventId or newStatus' }, { status: 400 });
-  }
-
   try {
-    const { error } = await supabase
+    // Step 1: Update the main event's status
+    const { error: eventError } = await supabase
       .from('workshop_events')
       .update({ is_active: newStatus })
       .eq('id', eventId);
+    if (eventError) throw eventError;
 
-    if (error) throw error;
+    // Step 2: Cascade the update to all child sessions
+    const { error: sessionError } = await supabase
+      .from('workshop_sessions')
+      .update({ is_active: newStatus })
+      .eq('event_id', eventId);
+    if (sessionError) throw sessionError;
 
-    return NextResponse.json({ message: 'Status updated successfully' });
-
+    return NextResponse.json({ message: 'Event and all sessions updated successfully' });
   } catch (error) {
-    console.error('Error updating status:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

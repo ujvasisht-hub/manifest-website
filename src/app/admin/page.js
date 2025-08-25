@@ -47,11 +47,63 @@ const AdminPage = () => {
   const handleLogout = async () => {await supabase.auth.signOut();router.push('/login');};
   const totalPages = Math.ceil(totalCount / SESSIONS_PER_PAGE);
 
-  const handleSessionStatusToggle = async (sessionId, currentStatus) => {const response = await fetch('/api/toggle-session-status', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, newStatus: !currentStatus }),});if (response.ok) {fetchWorkshops(currentPage, dateFilters);} else {alert('Failed to update session status.');}};
-  const handleDeleteEvent = async (eventId, eventTitle) => {if (window.confirm(`Are you sure you want to delete the event "${eventTitle}" and all of its sessions? This action cannot be undone.`)) {const response = await fetch('/api/delete-workshop', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId }),});if (response.ok) {fetchWorkshops(1, {}); fetchTotalStats();} else {alert('Failed to delete workshop.');}}};
+  // New function to toggle the main EVENT status
+  const handleEventStatusToggle = async (eventId, currentStatus) => {
+    const response = await fetch('/api/update-event-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId, newStatus: !currentStatus }),
+    });
+    if (response.ok) {
+      fetchWorkshops(currentPage, dateFilters);
+      fetchTotalStats();
+    } else {
+      alert('Failed to update event status.');
+    }
+  };
+  
+  // Updated function to toggle a single SESSION status
+  const handleSessionStatusToggle = async (sessionId, currentStatus, eventId) => {
+    const response = await fetch('/api/toggle-session-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, newStatus: !currentStatus, eventId }),
+    });
+    if (response.ok) {
+      fetchWorkshops(currentPage, dateFilters);
+    } else {
+      alert('Failed to update session status.');
+    }
+  };
+
+  const handleDeleteEvent = async (eventId, eventTitle) => {
+    if (window.confirm(`Are you sure you want to delete the event "${eventTitle}" and all of its sessions? This action cannot be undone.`)) {
+      const response = await fetch('/api/delete-workshop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId }),
+      });
+      if (response.ok) {
+        fetchWorkshops(1, {}); // Go back to page 1 with no filters
+        fetchTotalStats();
+      } else {
+        alert('Failed to delete workshop.');
+      }
+    }
+  };
   
   if (authLoading) { return <div className="text-center p-12 text-white">Verifying access...</div>; }
   
+  // Group sessions by their parent event for the new display
+  const groupedByEvent = filteredSessions.reduce((acc, session) => {
+    const event = session.workshop_events;
+    if (!acc[event.id]) {
+      acc[event.id] = { ...event, sessions: [] };
+    }
+    acc[event.id].sessions.push(session);
+    return acc;
+  }, {});
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex justify-between items-center mb-8"><h1 className="text-3xl font-bold text-white">Admin Dashboard</h1><button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button></div>
@@ -61,25 +113,46 @@ const AdminPage = () => {
         <div className="space-y-4 md:space-y-0 md:flex md:justify-between md:items-center"><h2 className="text-2xl font-bold text-white">Manage Sessions</h2><div className="flex flex-col md:flex-row md:items-center md:space-x-4"><input type="date" name="startDate" value={dateFilters.startDate} onChange={handleDateFilterChange} className="px-4 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400"/><input type="date" name="endDate" value={dateFilters.endDate} onChange={handleDateFilterChange} className="px-4 py-2 border border-gray-600 rounded-md mt-2 md:mt-0 bg-gray-800 text-white placeholder-gray-400"/><input type="text" placeholder="Search by title or artist..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="px-4 py-2 border border-gray-600 rounded-md mt-2 md:mt-0 bg-gray-800 text-white placeholder-gray-400"/></div></div>
         <div className="mt-4 bg-white p-4 rounded-lg shadow-md overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event Title</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artist Name</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Session Title</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Session Status</th><th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event / Session Details</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredSessions.map((session) => (
-                <tr key={session.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{session.workshop_events.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.workshop_events.artist_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{session.session_title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.time}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button onClick={() => handleSessionStatusToggle(session.id, session.is_active)} className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${session.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {session.is_active ? 'Active' : 'Inactive'}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                    <Link href={`/admin/edit/${session.workshop_events.id}`} className="text-teal-600 hover:text-teal-900">Edit</Link>
-                    <button onClick={() => handleDeleteEvent(session.workshop_events.id, session.workshop_events.title)} className="text-red-600 hover:text-red-900">Delete</button>
-                  </td>
-                </tr>
+              {Object.values(groupedByEvent).map((event) => (
+                <React.Fragment key={event.id}>
+                  {/* Main Event Row */}
+                  <tr className="bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap font-bold text-gray-900">
+                      {event.title} <span className="font-normal text-gray-500">by {event.artist_name}</span>
+                    </td>
+                    <td>
+                      <button onClick={() => handleEventStatusToggle(event.id, event.is_active)} className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${event.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {event.is_active ? 'Active' : 'Inactive'}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                      <Link href={`/admin/edit/${event.id}`} className="text-teal-600 hover:text-teal-900">Edit</Link>
+                      <button onClick={() => handleDeleteEvent(event.id, event.title)} className="text-red-600 hover:text-red-900">Delete</button>
+                    </td>
+                  </tr>
+                  {/* Session Rows */}
+                  {event.sessions.map(session => (
+                    <tr key={session.id}>
+                      <td className="pl-12 pr-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {session.session_title} ({session.date} at {session.time})
+                      </td>
+                      <td>
+                        <button onClick={() => handleSessionStatusToggle(session.id, session.is_active, event.id)} className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${session.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {session.is_active ? 'Active' : 'Inactive'}
+                        </button>
+                      </td>
+                      <td></td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -87,7 +160,6 @@ const AdminPage = () => {
         <div className="mt-4 flex justify-between items-center"><button onClick={() => fetchWorkshops(currentPage - 1)} disabled={currentPage <= 1} className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md border border-gray-600 disabled:opacity-50">Previous</button><span className="text-sm text-gray-300">Page {currentPage} of {totalPages}</span><button onClick={() => fetchWorkshops(currentPage + 1)} disabled={currentPage >= totalPages} className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md border border-gray-600 disabled:opacity-50">Next</button></div>
       </div>
       
-      {/* This is the restored form section */}
       <div className="mt-12">
         <div className="text-center mb-8"><h2 className="text-2xl font-bold text-white">Create New Workshop Event</h2></div>
         <div className="bg-white p-8 rounded-lg shadow-md">
