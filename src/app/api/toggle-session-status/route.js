@@ -18,13 +18,33 @@ export async function POST(request) {
       .eq('id', sessionId);
     if (sessionError) throw sessionError;
 
-    // Step 2: If we just activated a session, ensure its parent event is also active
+    // Step 2: Apply cascading logic
     if (newStatus === true) {
+      // If a session is activated, ensure its parent event is also active
       const { error: eventError } = await supabase
         .from('workshop_events')
         .update({ is_active: true })
         .eq('id', eventId);
       if (eventError) throw eventError;
+    } else {
+      // If a session is deactivated, check if all other sessions for this event are also inactive
+      const { data: otherSessions, error: fetchError } = await supabase
+        .from('workshop_sessions')
+        .select('is_active')
+        .eq('event_id', eventId);
+
+      if (fetchError) throw fetchError;
+
+      const allInactive = otherSessions.every(s => s.is_active === false);
+
+      if (allInactive) {
+        // If all sessions are inactive, deactivate the parent event
+        const { error: eventError } = await supabase
+          .from('workshop_events')
+          .update({ is_active: false })
+          .eq('id', eventId);
+        if (eventError) throw eventError;
+      }
     }
 
     return NextResponse.json({ message: 'Session status updated successfully' });
