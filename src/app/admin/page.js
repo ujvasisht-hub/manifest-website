@@ -7,7 +7,6 @@ import { supabase } from '../../utils/supabaseClient';
 
 const StatCard = ({ title, value }) => ( <div className="bg-gray-700 p-4 rounded-lg shadow-sm text-center"><p className="text-sm font-medium text-gray-400">{title}</p><p className="mt-1 text-3xl font-semibold text-white">{value}</p></div>);
 
-// Updated Pricing Tier component to include tier_name
 const PricingTierInput = ({ tier, index, onChange, onRemove }) => (
   <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
     <input type="text" name="tier_name" value={tier.tier_name} onChange={(e) => onChange(index, e)} className="w-28 px-2 py-1 border rounded-md text-black" placeholder="Tier Name"/>
@@ -19,13 +18,11 @@ const PricingTierInput = ({ tier, index, onChange, onRemove }) => (
   </div>
 );
 
-
 const AdminPage = () => {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   
-  // Default structure for a new session with tier names
   const newSessionStructure = { 
     session_title: '', date: '', time: '', total_seats: 50, use_tiered_pricing: false, cost: '1000', 
     pricing_tiers: [{ tier_name: 'Early Bird', up_to_seat: 50, price: 1000 }] 
@@ -44,7 +41,7 @@ const AdminPage = () => {
   const [dateFilters, setDateFilters] = useState({ startDate: '', endDate: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  
+
   useEffect(() => { const checkUser = async () => {const { data: { session } } = await supabase.auth.getSession();if (!session) {router.push('/login');} else {setUser(session.user);setAuthLoading(false);}}; checkUser(); }, [router]);
   const SESSIONS_PER_PAGE = 10;
   const fetchWorkshops = async (page = 1, filters = dateFilters) => { const params = new URLSearchParams({page: page.toString(),...(filters.startDate && { startDate: filters.startDate }),...(filters.endDate && { endDate: filters.endDate }),});const response = await fetch(`/api/get-workshops?${params.toString()}`);const { data, count } = await response.json();if (data) {setAllSessions(data);setFilteredSessions(data);setTotalCount(count || 0);setCurrentPage(page);}};
@@ -59,11 +56,10 @@ const AdminPage = () => {
   const addSession = () => {if (sessions.length < 10) {setSessions([...sessions, newSessionStructure]);}};
   const removeSession = (index) => {if (sessions.length > 1) {setSessions(sessions.filter((_, i) => i !== index));}};
   
-  // Updated addTier to include default names
   const addTier = (sessionIndex) => {
     const updatedSessions = [...sessions];
     const newTierIndex = updatedSessions[sessionIndex].pricing_tiers.length;
-    let defaultName = `Phase ${newTierIndex}`;
+    let defaultName = `Phase ${newTierIndex + 1}`;
     if (newTierIndex === 0) defaultName = 'Early Bird';
     if (newTierIndex === 1) defaultName = 'Phase 2';
     if (newTierIndex === 2) defaultName = 'OTC';
@@ -83,17 +79,78 @@ const AdminPage = () => {
   const handleDateFilterChange = (e) => { setDateFilters({ ...dateFilters, [e.target.name]: e.target.value }); };
   const handleLogout = async () => {await supabase.auth.signOut();router.push('/login');};
   const totalPages = Math.ceil(totalCount / SESSIONS_PER_PAGE);
-  if (authLoading) {return <div className="text-center p-12 text-white">Verifying access...</div>;}
 
+  // New function to handle the status toggle
+  const handleStatusToggle = async (eventId, currentStatus) => {
+    const newStatus = !currentStatus;
+    
+    // Optimistically update the UI
+    const updatedSessions = allSessions.map(s => {
+      if (s.workshop_events.id === eventId) {
+        s.workshop_events.is_active = newStatus;
+      }
+      return s;
+    });
+    setAllSessions(updatedSessions);
+
+    // Call the API to update the database
+    const response = await fetch('/api/toggle-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId, newStatus }),
+    });
+
+    if (!response.ok) {
+      // If the API call fails, revert the UI change and show an error
+      alert('Failed to update status. Please try again.');
+      const revertedSessions = allSessions.map(s => {
+        if (s.workshop_events.id === eventId) {
+          s.workshop_events.is_active = currentStatus;
+        }
+        return s;
+      });
+      setAllSessions(revertedSessions);
+    } else {
+        fetchTotalStats(); // Update the stat cards
+    }
+  };
+
+  if (authLoading) { return <div className="text-center p-12 text-white">Verifying access...</div>; }
+  
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-       <div className="flex justify-between items-center mb-8"><h1 className="text-3xl font-bold text-white">Admin Dashboard</h1><button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button></div>
-       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3"><StatCard title="Total Workshop Events" value={stats.total} /><StatCard title="Active Events" value={stats.active} /><StatCard title="Inactive Events" value={stats.inactive} /></div>
-       <div className="mt-12">
-            <div className="space-y-4 md:space-y-0 md:flex md:justify-between md:items-center"><h2 className="text-2xl font-bold text-white">Manage Sessions</h2><div className="flex flex-col md:flex-row md:items-center md:space-x-4"><input type="date" name="startDate" value={dateFilters.startDate} onChange={handleDateFilterChange} className="px-4 py-2 border border-gray-600 rounded-md bg-gray-800 text-white"/><input type="date" name="endDate" value={dateFilters.endDate} onChange={handleDateFilterChange} className="px-4 py-2 border border-gray-600 rounded-md mt-2 md:mt-0 bg-gray-800 text-white"/><input type="text" placeholder="Search by title or artist..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="px-4 py-2 border border-gray-600 rounded-md mt-2 md:mt-0 bg-gray-800 text-white placeholder-gray-400"/></div></div>
-            <div className="mt-4 bg-white p-4 rounded-lg shadow-md overflow-x-auto"><table className="min-w-full divide-y divide-gray-200"><thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event Title</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artist Name</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Session Title</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead><tbody className="bg-white divide-y divide-gray-200">{filteredSessions.map((session) => (<tr key={session.id}><td className="px-6 py-4 text-sm font-medium text-gray-900">{session.workshop_events.title}</td><td className="px-6 py-4 text-sm text-gray-500">{session.workshop_events.artist_name}</td><td className="px-6 py-4 text-sm text-gray-700">{session.session_title}</td><td className="px-6 py-4 text-sm text-gray-500">{session.date}</td><td className="px-6 py-4 text-sm text-gray-500">{session.time}</td><td className="px-6 py-4"><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${session.workshop_events.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{session.workshop_events.is_active ? 'Active' : 'Inactive'}</span></td><td className="px-6 py-4 text-right text-sm font-medium"><Link href={`/admin/edit/${session.workshop_events.id}`} className="text-teal-600 hover:text-teal-900">Edit</Link></td></tr>))}</tbody></table></div>
-            <div className="mt-4 flex justify-between items-center"><button onClick={() => fetchWorkshops(currentPage - 1)} disabled={currentPage <= 1} className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md border border-gray-600 disabled:opacity-50">Previous</button><span className="text-sm text-gray-300">Page {currentPage} of {totalPages}</span><button onClick={() => fetchWorkshops(currentPage + 1)} disabled={currentPage >= totalPages} className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md border border-gray-600 disabled:opacity-50">Next</button></div>
+      <div className="flex justify-between items-center mb-8"><h1 className="text-3xl font-bold text-white">Admin Dashboard</h1><button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button></div>
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3"><StatCard title="Total Workshop Events" value={stats.total} /><StatCard title="Active Events" value={stats.active} /><StatCard title="Inactive Events" value={stats.inactive} /></div>
+
+      <div className="mt-12">
+        <div className="space-y-4 md:space-y-0 md:flex md:justify-between md:items-center"><h2 className="text-2xl font-bold text-white">Manage Sessions</h2><div className="flex flex-col md:flex-row md:items-center md:space-x-4"><input type="date" name="startDate" value={dateFilters.startDate} onChange={handleDateFilterChange} className="px-4 py-2 border border-gray-600 rounded-md bg-gray-800 text-white"/><input type="date" name="endDate" value={dateFilters.endDate} onChange={handleDateFilterChange} className="px-4 py-2 border border-gray-600 rounded-md mt-2 md:mt-0 bg-gray-800 text-white"/><input type="text" placeholder="Search by title or artist..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="px-4 py-2 border border-gray-600 rounded-md mt-2 md:mt-0 bg-gray-800 text-white placeholder-gray-400"/></div></div>
+        <div className="mt-4 bg-white p-4 rounded-lg shadow-md overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event Title</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artist Name</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Session Title</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredSessions.map((session) => (
+                <tr key={session.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{session.workshop_events.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.workshop_events.artist_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{session.session_title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.time}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {/* New Toggle Switch */}
+                    <button onClick={() => handleStatusToggle(session.workshop_events.id, session.workshop_events.is_active)} className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${session.workshop_events.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {session.workshop_events.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <Link href={`/admin/edit/${session.workshop_events.id}`} className="text-teal-600 hover:text-teal-900">Edit</Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        <div className="mt-4 flex justify-between items-center"><button onClick={() => fetchWorkshops(currentPage - 1)} disabled={currentPage <= 1} className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md border border-gray-600 disabled:opacity-50">Previous</button><span className="text-sm text-gray-300">Page {currentPage} of {totalPages}</span><button onClick={() => fetchWorkshops(currentPage + 1)} disabled={currentPage >= totalPages} className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md border border-gray-600 disabled:opacity-50">Next</button></div>
+      </div>
       
       <div className="mt-12">
         <div className="text-center mb-8"><h2 className="text-2xl font-bold text-white">Create New Workshop Event</h2></div>
@@ -121,7 +178,6 @@ const AdminPage = () => {
                   <div className="flex items-center"><input type="checkbox" name="use_tiered_pricing" id={`use_tiered_pricing_${index}`} checked={session.use_tiered_pricing} onChange={(e) => handleSessionChange(index, e)} className="h-4 w-4 text-teal-600 border-gray-300 rounded"/><label htmlFor={`use_tiered_pricing_${index}`} className="ml-2 block text-sm font-medium text-gray-900">Use Tiered Pricing</label></div>
                   
                   {session.use_tiered_pricing ? (<div><label className="text-sm font-medium text-gray-700">Pricing Tiers</label><div className="space-y-2 mt-2">{session.pricing_tiers.map((tier, tierIndex) => (
-                    // This is the corrected line
                     <PricingTierInput key={tierIndex} tier={tier} index={tierIndex} onChange={(tierIdx, event) => handleTierChange(index, tierIdx, event)} onRemove={() => removeTier(index, tierIndex)} />
                   ))}</div><button type="button" onClick={() => addTier(index)} className="mt-2 text-sm text-teal-600 font-semibold">+ Add Tier</button></div>) : (<div><label className="text-sm font-medium text-gray-700">Flat Cost</label><input type="text" name="cost" required value={session.cost} onChange={(e) => handleSessionChange(index, e)} className="mt-1 w-full px-4 py-2 border rounded-md text-black" placeholder="e.g., ₹1500"/></div>)}
                   {sessions.length > 1 && (<button type="button" onClick={() => removeSession(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>)}
