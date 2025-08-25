@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import WorkshopCard from '../components/WorkshopCard';
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from '../utils/supabaseClient';
 
 const Home = () => {
   const [workshops, setWorkshops] = useState([]);
